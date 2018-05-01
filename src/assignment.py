@@ -43,6 +43,13 @@ POSE_COCO_BODY_PARTS = {
     18: "Background",
 }
 
+def isPositionedHigher(a,b):
+    if None in a or None in b:
+        return False
+    if a.y > b.y :
+        return True
+    return False
+
 if __name__ == '__main__':
     # arguements to your program
     parser = argparse.ArgumentParser(
@@ -91,19 +98,31 @@ if __name__ == '__main__':
         humans = e.inference(image)  # list of humans
         for id, human in enumerate(humans):
 
-            # TODO ensure it only prints this when someone is hailing a taxi.
-            # That is, an arm is above their head.
-            print("Someone is hailing a taxi!")
+            left_arm_pos = (None, None)
+            right_arm_pos = (None, None)
+            neck_pos = (None, None)
+
+            for k,v in human.body_parts.items():
+                if POSE_COCO_BODY_PARTS[k] == 'NECK':
+                    neck_pos = v
+                elif POSE_COCO_BODY_PARTS[k] == 'LWrist':
+                    left_arm_pos = v
+                elif POSE_COCO_BODY_PARTS[k] == 'RWrist':
+                    right_arm_pos = v
+
+            if isPositionedHigher(left_arm_pos, neck_pos) or isPositionedHigher(right_arm_pos, neck_pos):
+                print("Someone is hailing a taxi!")
 
             # Debugging statement: remove before demonstration.
-            # print([(POSE_COCO_BODY_PARTS[k], v.x, v.y) for k,v in human.body_parts.items()])
+            print([(POSE_COCO_BODY_PARTS[k], v.x, v.y) for k,v in human.body_parts.items()])
 
-        # drawing lines on an image
-        image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
+        # drawing lines on an image, sometimes returns a 0x0 image
+        # image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
 
         # FPS counter
         cv2.putText(image, "FPS: %f" % (1.0 / (time.time() - fps_time)),
                     (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        
         cv2.imshow('tf-pose-estimation result', image)
         fps_time = time.time()
         if cv2.waitKey(1) == 27:
