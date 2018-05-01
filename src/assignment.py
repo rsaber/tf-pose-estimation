@@ -44,7 +44,7 @@ POSE_COCO_BODY_PARTS = {
 }
 
 def isPositionedHigher(a,b):
-    if None in a or None in b:
+    if a is None or b is None:
         return False
     if a.y > b.y :
         return True
@@ -98,19 +98,16 @@ if __name__ == '__main__':
         humans = e.inference(image)  # list of humans
         for id, human in enumerate(humans):
 
-            left_arm_pos = (None, None)
-            right_arm_pos = (None, None)
-            neck_pos = (None, None)
+            hail_pos = None
+            neck_pos = None
 
             for k,v in human.body_parts.items():
-                if POSE_COCO_BODY_PARTS[k] == 'NECK':
+                if POSE_COCO_BODY_PARTS[k] == 'RShoulder':
                     neck_pos = v
-                elif POSE_COCO_BODY_PARTS[k] == 'LWrist':
-                    left_arm_pos = v
-                elif POSE_COCO_BODY_PARTS[k] == 'RWrist':
-                    right_arm_pos = v
+                elif POSE_COCO_BODY_PARTS[k] in ['RWrist', 'LWrist', 'RElbow', 'LElbow']:
+                    hail_pos = v if hail_pos is None or v.y > hail_pos.y else hail_pos
 
-            if isPositionedHigher(left_arm_pos, neck_pos) or isPositionedHigher(right_arm_pos, neck_pos):
+            if isPositionedHigher(hail_pos, neck_pos):
                 print("Someone is hailing a taxi!")
 
             # Debugging statement: remove before demonstration.
