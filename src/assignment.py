@@ -47,6 +47,7 @@ def isPositionedHigher(a,b):
     if a is None or b is None:
         return False
     if a.y > b.y :
+        #print(a.y, b.y)
         return True
     return False
 
@@ -102,16 +103,18 @@ if __name__ == '__main__':
             neck_pos = None
 
             for k,v in human.body_parts.items():
-                if POSE_COCO_BODY_PARTS[k] == 'RShoulder':
-                    neck_pos = v
-                elif POSE_COCO_BODY_PARTS[k] in ['RWrist', 'LWrist', 'RElbow', 'LElbow']:
+                if POSE_COCO_BODY_PARTS[k] == 'RShoulder' or POSE_COCO_BODY_PARTS[k] == 'LShoulder':
+                    print("Shoulder found at " + str(v.y))
+                    neck_pos = v if neck_pos is None or v.y < neck_pos.y else neck_pos
+                elif POSE_COCO_BODY_PARTS[k] in ['LWrist', 'RWrist']:
+                    print("Wrist found at " + str(v.y))
                     hail_pos = v if hail_pos is None or v.y > hail_pos.y else hail_pos
 
             if isPositionedHigher(hail_pos, neck_pos):
                 print("Someone is hailing a taxi!")
 
             # Debugging statement: remove before demonstration.
-            print([(POSE_COCO_BODY_PARTS[k], v.x, v.y) for k,v in human.body_parts.items()])
+            # print([(POSE_COCO_BODY_PARTS[k], v.x, v.y) for k,v in human.body_parts.items()])
 
         # drawing lines on an image, sometimes returns a 0x0 image
         # image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
